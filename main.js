@@ -799,7 +799,8 @@ app.whenReady().then(() => {
     },
     { useSystemPicker: false },
   );
-
+  app.setName(process.env.APP_NAME?.trim() || 'Ghost Overlay');
+  app.setAppUserModelId('com.ghostoverlay.app');
   createWindow();
   registerShortcuts();
   if (!Object.keys(loadBrief()).length || !geminiKey()) openSetup();
