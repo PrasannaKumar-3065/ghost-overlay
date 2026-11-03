@@ -1,0 +1,29 @@
+{
+  "name": "ghost-overlay",
+  "version": "1.1.0",
+  "description": "Gemini Live meeting copilot: continuous system audio transcription and streaming Gemini answers",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --config electron-builder.config.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.example.ghostoverlay",
+    "productName": "Ghost Overlay",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "win": { "target": "nsis" },
+    "mac": { "target": "dmg" }
+  }
+}

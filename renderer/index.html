@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="style.css">
+  <title>Ghost Overlay</title>
+</head>
+<body>
+  <div id="panel">
+    <div id="bar">
+      <span id="dot"></span>
+      <span id="status">Starting…</span>
+      <span id="clock"></span>
+      <span id="mode">click-through</span>
+      <button id="close" type="button" aria-label="Quit Ghost Overlay" title="Quit Ghost Overlay">×</button>
+    </div>
+    <div id="remind"></div>
+    <div id="answers" aria-live="polite">
+      <div class="empty">Suggested replies will appear here.</div>
+    </div>
+    <div id="heard"></div>
+  </div>
+  <script src="renderer.js"></script>
+  <script>
+    document.getElementById('close').addEventListener('click', () => window.api.closeApp());
+  </script>
+</body>
+</html>

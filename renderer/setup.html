@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Meeting briefing</title>
+<style>
+  body { font:16px/1.5 -apple-system,"Segoe UI",system-ui,sans-serif; background:#12141a; color:#eceef3; margin:0; padding:24px; }
+  .heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  h2 { margin:0 0 8px; font-size:22px; }
+  #close { flex:none; width:36px; height:36px; margin:0; padding:0; border:0; border-radius:8px; background:#292d38; color:#eceef3; font:26px/1 system-ui,sans-serif; cursor:pointer; }
+  #close:hover { background:#713d46; }
+  .sub { color:#9aa3b5; font-size:12px; margin:0 0 16px; }
+  label { display:block; margin:14px 0 4px; font-weight:600; font-size:13px; }
+  small { color:#8d96a8; font-weight:400; }
+  textarea, input { width:100%; box-sizing:border-box; background:#1b1e27; color:#eceef3; border:1px solid #2c3140; border-radius:8px; padding:10px; font:inherit; }
+  textarea { resize:vertical; }
+  details { background:#171a22; border:1px solid #2c3140; border-radius:10px; padding:10px 14px; margin-bottom:6px; }
+  summary { cursor:pointer; font-weight:600; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  button { margin-top:18px; width:100%; padding:12px; border:0; border-radius:8px; background:#4f7cff; color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="heading">
+  <h2>Brief your meeting assistant</h2>
+  <button id="close" type="button" aria-label="Close briefing window" title="Close">×</button>
+</div>
+<p class="sub">Ghost Overlay uses Gemini Live for continuous transcription and Gemini Flash for short streaming replies. Audio is sent to Google while listening.</p>
+
+<details id="set" open>
+  <summary>Gemini API key &amp; model</summary>
+  <label>Gemini API key</label>
+  <input id="k_gemini" type="password" placeholder="AIza...">
+  <div class="row">
+    <div>
+      <label>Answer model <small>(optional)</small></label>
+      <input id="model" placeholder="gemini-3.6-flash">
+    </div>
+    <div>
+      <label>Language hint <small>(optional)</small></label>
+      <input id="language" placeholder="leave blank for auto-detect">
+    </div>
+  </div>
+  <small>Live transcription uses gemini-3.5-transcribe-live with automatic language detection. Set GEMINI_LIVE_STT_MODEL in .env to override it.</small>
+</details>
+
+<label>Meeting goal</label>
+<textarea id="goal" rows="2" placeholder="e.g. Explain my experience and answer the interviewer's questions"></textarea>
+
+<label>Background <small>(who you are, key facts, experience, numbers)</small></label>
+<textarea id="context" rows="6" placeholder="I'm a software engineer with 3 years of experience..."></textarea>
+
+<label>How should it sound?</label>
+<textarea id="style" rows="2" placeholder="Friendly, concise, confident, natural spoken language"></textarea>
+
+<label>Reminders &amp; talking points <small>(one per line)</small></label>
+<textarea id="reminders" rows="6" placeholder="Mention my experience with Python when relevant
+Ask about the team's development process
+@10m Ask about next steps"></textarea>
+<small>Lines starting with @10m pop up at that minute. Other lines appear when relevant.</small>
+
+<button id="go">Save &amp; start meeting</button>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const briefFields = ['goal', 'context', 'style', 'reminders'];
+  $('close').onclick = () => window.api.closeSetup();
+
+  window.api.briefGet().then((brief) => {
+    briefFields.forEach((key) => { $(key).value = brief[key] || ''; });
+  }).catch(() => {});
+
+  window.api.settingsGet().then((settings) => {
+    $('model').value = settings.model || '';
+    $('language').value = settings.language || '';
+    if (settings.has?.gemini) $('k_gemini').placeholder = 'saved ✓ (type to replace)';
+  }).catch(() => {});
+
+  $('go').onclick = async () => {
+    const button = $('go');
+    button.disabled = true;
+    button.textContent = 'Saving…';
+    try {
+      await window.api.settingsSave({
+        model: $('model').value,
+        language: $('language').value,
+        keys: { gemini: $('k_gemini').value },
+      });
+      const brief = {};
+      briefFields.forEach((key) => { brief[key] = $(key).value; });
+      await window.api.briefSave(brief);
+    } catch (error) {
+      alert(error.message || 'Could not save settings.');
+      button.disabled = false;
+      button.textContent = 'Save & start meeting';
+    }
+  };
+</script>
+</body>
+</html>
